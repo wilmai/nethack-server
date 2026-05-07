@@ -1,0 +1,12 @@
+# Default NetHack 5.0.0 rcfile.
+# Reference: https://nethackwiki.com/wiki/Options
+
+OPTIONS=color,hilite_pet,showrace
+OPTIONS=menucolors,lit_corridor
+OPTIONS=statuslines:3
+OPTIONS=time,showexp,showscore
+OPTIONS=autopickup,autodig,fixinv,pickup_burden:S,pickup_types:$?+!=/
+OPTIONS=msghistory:50
+OPTIONS=runmode:run
+OPTIONS=disclose:+i +a +v +g +c +o
+

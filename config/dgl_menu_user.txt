@@ -1,0 +1,12 @@
+>  UAA SOFTWARE  --  United Antarctican Alliance, since 1959
+>  OPERATION NETHACK            CLASSIFIED YENDOR TOP SECRET
+
+
+    >AUTHENTICATED<
+    p)  Play NetHack
+    c)  Change password
+    o)  Edit NetHack options
+    w)  Watch a game in progress
+
+
+    q)  Quit =>
