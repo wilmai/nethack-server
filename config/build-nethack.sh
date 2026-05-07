@@ -12,6 +12,9 @@ tar xzf nh.tgz && rm nh.tgz
 
 cd "NetHack-${NH_VER}"
 sed -i 's@^PREFIX=.*@PREFIX=/usr@' "sys/unix/hints/linux.${NH_V}"
+# Enable in-game mail.
+sed -i 's@^/\* #define SIMPLE_MAIL \*/@#define SIMPLE_MAIL@' include/unixconf.h
+grep -q '^#define SIMPLE_MAIL' include/unixconf.h
 sh sys/unix/setup.sh "sys/unix/hints/linux.${NH_V}"
 make fetch-lua
 make WANT_WIN_TTY=1 WANT_WIN_CURSES=1 -j"$(nproc)" all
