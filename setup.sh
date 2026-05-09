@@ -4,7 +4,7 @@
 set -eu
 cd "$(dirname "$0")"
 
-RUNTIME=${RUNTIME:-podman}
+RUNTIME=${RUNTIME:-$(command -v podman >/dev/null 2>&1 && echo podman || echo docker)}
 
 echo "==> Building image (dgl-nethack) with $RUNTIME..."
 $RUNTIME build -t dgl-nethack .
