@@ -40,4 +40,9 @@ for d in null zero urandom tty; do
 done
 
 mkdir -p /run/sshd
+
+# Background services: ttyd (terminal-over-WS) and nginx
+ttyd -p 7681 -i 127.0.0.1 -W -a /usr/local/bin/ttyd-dgl-launch &
+nginx
+
 exec "$@"

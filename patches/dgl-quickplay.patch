@@ -1,0 +1,63 @@
+Add a `-l <user>` flag: same auth-bypass as `-i`, but continues into the
+menu instead of running the REGISTER cmd queue and exiting. Used by the
+ttyd launcher to auto-login a Cloudflare-Access-authenticated user.
+
+If <user> doesn't exist or is locked, autologin silently no-ops and the
+menu opens in anonymous mode.
+
+--- a/dgamelaunch.c
++++ b/dgamelaunch.c
+@@ -101,6 +101,8 @@ char * __progname;
+ int  g_idle_alarm_enabled = 0;
+ int  showplayers = 0;
+ int  initplayer = 0;
++int  quickplay = 0;
++char *quickplay_user = NULL;
+ void (*g_chain_winch)(int);
+
+ #ifndef USE_SQLITE3
+@@ -1797,7 +1799,7 @@ autologin (char* user, char *pass)
+   tmp = userexist(user, 0);
+   if (tmp) {
+       me = cpy_me(tmp);
+-      if ((passwordgood(pass) || initplayer == 1) && !(me->flags & DGLACCT_LOGIN_LOCK)) {
++      if ((passwordgood(pass) || initplayer == 1 || quickplay == 1) && !(me->flags & DGLACCT_LOGIN_LOCK)) {
+ 	  loggedin = 1;
+ 	  setproctitle ("%s", me->username);
+ 	  dgl_exec_cmdqueue(globalconfig.cmdqueue[DGLTIME_LOGIN], 0, me);
+@@ -2723,7 +2725,7 @@ main (int argc, char** argv)
+
+   __progname = basename(strdup(argv[0]));
+
+-  while ((c = getopt(argc, argv, "csqh:pi:aeW:SD")) != -1)
++  while ((c = getopt(argc, argv, "csqh:pi:aeW:SDl:")) != -1)
+   {
+       /* Stop processing arguments at -c, so that user-provided
+        * commands (via ssh for example) to the dgamelaunch login
+@@ -2750,6 +2752,12 @@ main (int argc, char** argv)
+ 	}
+ 	break;
+
++      case 'l':
++	if (optarg && *optarg != '\0') {
++		quickplay_user = strdup(optarg);
++	}
++	break;
++
+     case 'W':
+ 	wall_email_str = strdup(optarg);
+ 	break;
+@@ -2940,6 +2948,12 @@ main (int argc, char** argv)
+       }
+     }
+   }
+
++  if (quickplay_user) {
++    quickplay = 1;
++    autologin(quickplay_user, "");
++    quickplay = 0;
++  }
++
+   initcurses ();
+
+   g_chain_winch = signal(SIGWINCH, sigwinch_func);

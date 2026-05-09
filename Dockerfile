@@ -34,6 +34,8 @@ RUN NH_VER="${NH_VER}" NH_SHA256="${NH_SHA256}" sh /tmp/build-nethack.sh
 # --- Build dgamelaunch ------------------------------------------------------
 RUN git clone --depth=1 --branch ${DGL_REF} ${DGL_REPO} dgl
 WORKDIR /tmp/build/dgl
+COPY patches/dgl-quickplay.patch /tmp/patches/dgl-quickplay.patch
+RUN git apply /tmp/patches/dgl-quickplay.patch
 RUN ./autogen.sh \
     && ./configure --enable-sqlite --with-config-file=/etc/dgamelaunch.conf \
     && make -j1 dgamelaunch \
@@ -55,7 +57,13 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
       openssh-server ca-certificates ncurses-base \
       libncursesw6 libtinfo6 libsqlite3-0 sqlite3 \
+      nginx-light curl \
     && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
+
+ARG TTYD_VER=1.7.7
+RUN curl -fsSL "https://github.com/tsl0922/ttyd/releases/download/${TTYD_VER}/ttyd.x86_64" \
+      -o /usr/local/bin/ttyd \
+    && chmod 0755 /usr/local/bin/ttyd
 
 COPY --from=builder /out/chroot       /var/dgl-chroot
 COPY --from=builder /out/dgamelaunch  /usr/local/bin/dgamelaunch
@@ -77,7 +85,12 @@ RUN useradd -m -s /usr/local/bin/dgamelaunch nethack \
 COPY config/dgl-init.sh /usr/local/bin/dgl-init
 RUN chmod +x /usr/local/bin/dgl-init
 
-EXPOSE 22
+COPY config/ttyd-dgl-launch.sh /usr/local/bin/ttyd-dgl-launch
+RUN chmod +x /usr/local/bin/ttyd-dgl-launch
+
+COPY config/nginx-ttyd.conf /etc/nginx/nginx.conf
+
+EXPOSE 22 80
 
 # Persistent state.  save/bones are split out of HACKDIR so they don't
 # mask the level/data files inside it.
